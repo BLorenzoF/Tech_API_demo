@@ -1,0 +1,6 @@
+repos:      
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+      - id: check-ast # check syntax of python files
+      - id: debug-statements # check for debugger imports and py37+ breakpoint()
