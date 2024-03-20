@@ -1,9 +1,9 @@
-#import fire
-import argparse
-from pydantic import BaseModel, EmailStr
-from tinydb import TinyDB
+import sys
+import argparse # Required to introduce the data with flags
+from pydantic import BaseModel, EmailStr # BaseModel for pydantic to understand the format we should introduce the data, EmailStr to validate the e-mail
+from tinydb import TinyDB, Query #Importing TinyDB for the creation of the database and Query to use in the "get_customer" method.
 
-db = TinyDB('db.json')
+db = TinyDB('db.json') # declaring db variable.
 
 class Customer(BaseModel):
     name: str
@@ -30,17 +30,18 @@ class CustomerManager:
         else:
             self.id = 1
         return self.id
-    def get_customer(self, id):
+    def get_customer(self, id): # Not working yet, to-do.
         User = Query()
         customer = self.db.search(User.id == id)
         return(customer)
 def main():
     parser = argparse.ArgumentParser(description="Inserts a customer.")
-    parser.add_argument("method", choices=["add_customer"], help="Method to run")
-    parser.add_argument("--name", type=str, help="Name", required=True)
-    parser.add_argument("--email", type=str, help="Email", required=True)
-    parser.add_argument("--age", type=int, help="Age", required=True)
-    parser.add_argument("--country", type=str, help="Country", required=True)
+    parser.add_argument("method", choices=["add_customer", "get_customer"], help="Method to run") #
+    parser.add_argument("--name", type=str, help="Name", required=False)
+    parser.add_argument("--email", type=str, help="Email", required=False)
+    parser.add_argument("--age", type=int, help="Age", required=False)
+    parser.add_argument("--country", type=str, help="Country", required=False)
+    parser.add_argument("--id", type=int, help="Id to query when using get_customer", required=False)
     args = parser.parse_args()
 
     if args.method == "add_customer":
@@ -50,6 +51,15 @@ def main():
                                                            country=args.country)
             print("Customer added:", customer_info)
             db.insert(customer_info)
+            sys.exit('Customer added succesfully')
+        except ValueError as e:
+            print("Error adding customer:", e)
+    if args.method == "get_customer":
+        customer_manager = CustomerManager()
+        try:
+            customer_id = customer_manager.get_customer(id= args.id)
+            print("Customer retrieved:", customer_id)
+            sys.exit('Customer retrieved succesfully')
         except ValueError as e:
             print("Error adding customer:", e)
     else:
@@ -57,5 +67,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    #fire.fire()
-
