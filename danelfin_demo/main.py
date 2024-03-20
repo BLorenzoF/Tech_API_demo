@@ -3,38 +3,43 @@ import argparse # Required to introduce the data with flags
 from pydantic import BaseModel, EmailStr # BaseModel for pydantic to understand the format we should introduce the data, EmailStr to validate the e-mail
 from tinydb import TinyDB, Query #Importing TinyDB for the creation of the database and Query to use in the "get_customer" method.
 
+
 db = TinyDB('db.json') # declaring db variable.
 
-class Customer(BaseModel):
+class Customer(BaseModel): # Creation of customer class for add_customer
     name: str
     email: EmailStr
     age: int
     country: str
 
-class CustomerManager:
+class CustomerManager: # Customer manager class will handle the methods.
+
     def __init__(self):
         self.customers = []
-        self.id = self.get_id()
-        self.db = db
+        self.id = self.get_id() # will update id for it's output.
+        self.db = db # introducing variable for get_id method
 
-    def add_customer(self, name: str, email: str, age: int, country: str):
+    def add_customer(self, name: str, email: str, age: int, country: str): # add_customer method. Retrieves customer from BaseModel for e-mail validation
         customer = Customer(name=name, email=email, age=age, country=country)
         self.customers.append(customer.dict())
         customer_dict = customer.dict()
-        customer_dict['id'] = self.id
+        customer_dict['id'] = self.id # adds
         return customer_dict
-    def get_id(self):
+
+    def get_id(self): #method that gets the len of the database to get it's last ID, not fool-proof to removal of rows.
         last_row = db.get(doc_id=len(db))
         if last_row:
             self.id = last_row.doc_id + 1
         else:
             self.id = 1
         return self.id
-    def get_customer(self, id): # Not working yet, to-do.
+
+    def get_customer(self, id):
         User = Query()
         customer = self.db.search(User.id == id)
         return(customer)
-def main():
+
+def main(): #Main function, with argparse you can input different flags.
     parser = argparse.ArgumentParser(description="Inserts a customer.")
     parser.add_argument("method", choices=["add_customer", "get_customer"], help="Method to run") #
     parser.add_argument("--name", type=str, help="Name", required=False)
