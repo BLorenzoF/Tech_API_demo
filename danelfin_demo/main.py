@@ -7,6 +7,9 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pyarrow.dataset as ds
 import pandas as pd
+from loguru import logger
+
+logger.debug("That's it, beautiful and simple logging!")
 
 db = TinyDB('db.json') # declaring db variable.
 
@@ -38,7 +41,7 @@ class CustomerManager: # Customer manager class will handle the methods.
             self.id = 1
         return self.id
 
-    def get_customer(self, id):
+    def get_customer(self, id): ##MISSING error if id doesn't exist in database.
         User = Query()
         customer = self.db.search(User.id == id)
         return(customer)
@@ -80,7 +83,7 @@ def main(): #Main function, with argparse you can input different flags.
         try:
             customer_id = customer_manager.get_customer(id= args.id)
             print("Customer retrieved:", customer_id)
-            sys.exit('Customer retrieved succesfully')
+            sys.exit('Customer retrieved succesfully') ### To-do: Add option if id doesn't exist in database.
         except ValueError as e:
             print("Error retrieving customer:", e)
     if args.method == "dump":
