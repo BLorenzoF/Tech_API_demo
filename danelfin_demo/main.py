@@ -1,8 +1,12 @@
+import os
 import sys
 import argparse # Required to introduce the data with flags
 from pydantic import BaseModel, EmailStr # BaseModel for pydantic to understand the format we should introduce the data, EmailStr to validate the e-mail
 from tinydb import TinyDB, Query #Importing TinyDB for the creation of the database and Query to use in the "get_customer" method.
-
+import pyarrow as pa
+import pyarrow.parquet as pq
+import pyarrow.dataset as ds
+import pandas as pd
 
 db = TinyDB('db.json') # declaring db variable.
 
@@ -39,21 +43,21 @@ class CustomerManager: # Customer manager class will handle the methods.
         customer = self.db.search(User.id == id)
         return(customer)
 
-    def dump(self): # method for dumping a parquet file
-        pyarrow_db = pa.json.read_json(os.getcwd() + "\\db.json")
-        fields = [('name', pa.string()),
-                  ('email', pa.string()),
-                  ('age', pa.int64()),
-                  ('country', pa.string()),
-                  ('id', pa.int64())]
-        scheme = ds.partitioning(pa.schema([("country", pa.string())]), flavor="hive")
-        parquet_file = pq.write_to_dataset(table=pyarrow_db, root_path=os.getcwd(), partitioning=scheme, schema=None,
-                            basename_template='dump{i}.parquet')
+    def dump(self, db): # method for dumping a parquet file
+        pd_dataset = pd.DataFrame(db.all()) # convert db.all to a pandas dataset
+        pa_dataset = pa.Table.from_pandas(pd_dataset) #convert pandas dataset to pyarrow dataset
+        my_schema = pa.schema([('name', pa.string()),
+                               ('email', pa.string()),
+                               ('age', pa.int64()),
+                               ('country', pa.string()),
+                               ('id', pa.int64())]) # Define the schema for the dump
+        partition_scheme = ds.partitioning(pa.schema([pa.field('country', pa.string())]), flavor=None) #Define partitioning object
+        parquet_file = pq.write_to_dataset(table =pa_dataset ,root_path=  os.getcwd(), partitioning = partition_scheme, schema=my_schema, basename_template= 'dump{i}.parquet', existing_data_behavior= 'overwrite_or_ignore')
         return parquet_file
 
 def main(): #Main function, with argparse you can input different flags.
     parser = argparse.ArgumentParser(description="Inserts a customer.")
-    parser.add_argument("method", choices=["add_customer", "get_customer"], help="Method to run") #
+    parser.add_argument("method", choices=["add_customer", "get_customer",'dump'], help="Method to run") #
     parser.add_argument("--name", type=str, help="Name", required=False)
     parser.add_argument("--email", type=str, help="Email", required=False)
     parser.add_argument("--age", type=int, help="Age", required=False)
@@ -78,7 +82,14 @@ def main(): #Main function, with argparse you can input different flags.
             print("Customer retrieved:", customer_id)
             sys.exit('Customer retrieved succesfully')
         except ValueError as e:
-            print("Error adding customer:", e)
+            print("Error retrieving customer:", e)
+    if args.method == "dump":
+        customer_manager = CustomerManager()
+        try:
+            customer_id = customer_manager.dump(db)
+            sys.exit('dumped succesfully')
+        except ValueError as e:
+            print("Error dumping:", e)
     else:
         print("Invalid method specified.")
 
