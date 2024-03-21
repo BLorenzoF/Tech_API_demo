@@ -39,6 +39,18 @@ class CustomerManager: # Customer manager class will handle the methods.
         customer = self.db.search(User.id == id)
         return(customer)
 
+    def dump(self): # method for dumping a parquet file
+        pyarrow_db = pa.json.read_json(os.getcwd() + "\\db.json")
+        fields = [('name', pa.string()),
+                  ('email', pa.string()),
+                  ('age', pa.int64()),
+                  ('country', pa.string()),
+                  ('id', pa.int64())]
+        scheme = ds.partitioning(pa.schema([("country", pa.string())]), flavor="hive")
+        parquet_file = pq.write_to_dataset(table=pyarrow_db, root_path=os.getcwd(), partitioning=scheme, schema=None,
+                            basename_template='dump{i}.parquet')
+        return parquet_file
+
 def main(): #Main function, with argparse you can input different flags.
     parser = argparse.ArgumentParser(description="Inserts a customer.")
     parser.add_argument("method", choices=["add_customer", "get_customer"], help="Method to run") #
