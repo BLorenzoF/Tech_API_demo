@@ -47,18 +47,27 @@ class CustomerManager: # Customer manager class will handle the methods.
         logger.info(f' Customer method ran successfully with return: {customer}')
         return(customer)
 
-    def dump(self, db): # method for dumping a parquet file
-        pd_dataset = pd.DataFrame(db.all()) # convert db.all to a pandas dataset
-        pa_dataset = pa.Table.from_pandas(pd_dataset) #convert pandas dataset to pyarrow dataset
-        my_schema = pa.schema([('name', pa.string()),
-                               ('email', pa.string()),
-                               ('age', pa.int64()),
-                               ('country', pa.string()),
-                               ('id', pa.int64())]) # Define the schema for the dump
-        partition_scheme = ds.partitioning(pa.schema([pa.field('country', pa.string())]), flavor=None) #Define partitioning object
-        parquet_file = pq.write_to_dataset(table =pa_dataset ,root_path=  os.getcwd(), partitioning = partition_scheme, schema=my_schema, basename_template= 'dump{i}.parquet', existing_data_behavior= 'overwrite_or_ignore')
-        logger.info(f' dump method ran successfully with output partitioned in {pd_dataset.country.unique()} folders')
-        return parquet_file
+    def dump(self, db):  # method for dumping a parquet file
+        logger.debug(f"dump is being initiated")
+        pd_dataset = pd.DataFrame(db.all())  # convert db.all to a pandas dataset
+        logger.debug(f"len pd dataset:{len(pd_dataset)}")
+        if (len(pd_dataset) == 0):
+            logger.warning(f"This is a warning message, db.json has {len(pd_dataset)} values")
+            sys.exit('Exiting program, dump unsuccessful')
+        else:
+            pa_dataset = pa.Table.from_pandas(pd_dataset)  # convert pandas dataset to pyarrow dataset
+            my_schema = pa.schema([('name', pa.string()),
+                                   ('email', pa.string()),
+                                   ('age', pa.int64()),
+                                   ('country', pa.string()),
+                                   ('id', pa.int64())])  # Define the schema for the dump
+            partition_scheme = ds.partitioning(pa.schema([pa.field('country', pa.string())]),
+                                               flavor=None)  # Define partitioning object
+            parquet_file = pq.write_to_dataset(table=pa_dataset, root_path=os.getcwd(), partitioning=partition_scheme,
+                                               schema=my_schema, basename_template='dump{i}.parquet',
+                                               existing_data_behavior='overwrite_or_ignore')
+            logger.info(f' database dumped successfully in {pd_dataset.country.unique()} folders')
+            return parquet_file
 
 def main(): #Main function, with argparse you can input different flags.
     logger.add("output.log", rotation="20 MB") #Configuring logger output file
@@ -95,6 +104,7 @@ def main(): #Main function, with argparse you can input different flags.
     if args.method == "dump":#If method selected is dump, the following code will be executed
         customer_manager = CustomerManager()
         try:
+            logger.debug("This is a debug message")
             customer_id = customer_manager.dump(db)
             sys.exit('dumped succesfully')
         except ValueError as e:#dump Error display.
