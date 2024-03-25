@@ -4,7 +4,7 @@
 Project for Managing and Adding Customers. This project has an easy-to-use storage system. It checks data carefully, records details, and tests everything well. Everything is neatly arranged and easy to understand. It also focuses on managing errors well. Plus, the project uses Docker to keep everything running smoothly in its own container
 
 ## Development
-To prevent dependency conflicts, installing a virtual environment via the `venv` library is advisable. Being a Python package, installation in development mode is required for console execution. Use the command `pip install -e .` to install the package in development mode, allowing it to be executed from the console using `python {{cookiecutter.project_name}}/main.py`.
+To prevent dependency conflicts, installing a virtual environment via the `venv` library is advisable. Being a Python package, installation in development mode is required for console execution. Use the command `pip install -e .` to install the package in development mode, allowing it to be executed from the console using `python danelfin_demo/main.py`.
 
 ## Rubric
 - Utilize `TinyDB` to create a database for client storage.
@@ -35,7 +35,7 @@ To prevent dependency conflicts, installing a virtual environment via the `venv`
         }
     
     example:
-        python {{cookiecutter.project_name}}/main.py add-customer --name Peter --email peter@test.com --age 32 --country ES
+        python danelfin_demo/main.py add-customer --name Peter --email peter@test.com --age 32 --country ES
 
     ```
 - Get customer
@@ -53,7 +53,7 @@ To prevent dependency conflicts, installing a virtual environment via the `venv`
         }
     
     example:
-        python {{cookiecutter.project_name}}/main.py get-client --id 1
+        python danelfin_demo/main.py get-client --id 1
     ```
 
 - Dump clients
@@ -62,5 +62,5 @@ To prevent dependency conflicts, installing a virtual environment via the `venv`
             .parquet file with all the customers, partitioned by country
         
         example:
-            python {{cookiecutter.project_name}}/main.py dump
+            python danelfin_demo/main.py dump
     ```
