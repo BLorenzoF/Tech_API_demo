@@ -7,7 +7,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pyarrow.dataset as ds
 import pandas as pd
-
+#import fire 
 
 db = TinyDB('db.json') # declaring db variable.
 
@@ -16,7 +16,7 @@ class Customer(BaseModel): # Creation of customer class for add_customer
     email: EmailStr
     age: int
     country: str
-
+#@fire.Fire ###
 class CustomerManager: # Customer manager class will handle the methods.
 
     def __init__(self):
@@ -41,7 +41,7 @@ class CustomerManager: # Customer manager class will handle the methods.
         #logger.info(f' get_id method ran successfully with return : {self.id}') -
         return self.id
 
-    def get_customer(self, id): ##MISSING error if id doesn't exist in database.
+    def get_client(self, id): ##MISSING error if id doesn't exist in database.
         User = Query()
         customer = self.db.search(User.id == id)
         logger.info(f' Customer method ran successfully with return: {customer}')
@@ -68,3 +68,5 @@ class CustomerManager: # Customer manager class will handle the methods.
                                                existing_data_behavior='overwrite_or_ignore')
             logger.info(f' database dumped successfully in {pd_dataset.country.unique()} folders')
             return parquet_file
+            
+
