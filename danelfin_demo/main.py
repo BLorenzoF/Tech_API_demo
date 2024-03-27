@@ -24,7 +24,8 @@ class CustomerManager: # Customer manager class will handle the methods.
         self.id = self.get_id() # will update id for it's output.
         self.db = db # introducing variable for get_id method
 
-    def add_customer(self, name: str, email: str, age: int, country: str): # add_customer method. Retrieves customer from BaseModel for e-mail validation
+    def add_customer(self,name: str, email: str, age: int, country: str): # add_customer method. Retrieves customer from BaseModel for e-mail validation
+        #db= TinyDB('db.json')
         customer = Customer(name=name, email=email, age=age, country=country)
         self.customers.append(customer.dict())
         customer_dict = customer.dict()
@@ -48,8 +49,8 @@ class CustomerManager: # Customer manager class will handle the methods.
             logger.warning(f"This is a warning message, entry has {len(customer)} values")
             sys.exit('Exiting program, id retrieval unsuccessful')
         customer_dict = dict(customer[0])
-        logger.info(f' Customer method ran successfully with id {id} queried: {customer}')
-        return print(customer_dict)
+        logger.info(f' Customer method ran successfully with id {id} queried: {customer[0]}')
+        return customer_dict
 
     def dump(self):  # method for dumping a parquet file
         logger.debug(f"dump is being initiated")
