@@ -20,20 +20,10 @@ class Customer(BaseModel): # Creation of customer class for add_customer
 class CustomerManager: # Customer manager class will handle the methods.
 
     def __init__(self):
-        self.customers = []
         self.id = self.get_id() # will update id for it's output.
         self.db = db # introducing variable for get_id method
-
-    def add_customer(self,name: str, email: str, age: int, country: str): # add_customer method. Retrieves customer from BaseModel for e-mail validation
-        #db= TinyDB('db.json')
-        customer = Customer(name=name, email=email, age=age, country=country)
-        self.customers.append(customer.dict())
-        customer_dict = customer.dict()
-        customer_dict['id'] = self.id # adds
-        logger.info(f' add_customer method ran successfully with return: {customer_dict}')
-        return db.insert(customer_dict)
-
-    def get_id(self): #method that gets the len of the database to get it's last ID, not fool-proof to removal of rows.
+        
+    def get_id(self): #Retrieves the len of the database to get it's last ID. Used to add id in add_customer method
         last_row = db.get(doc_id=len(db))
         if last_row:
             self.id = last_row.doc_id + 1
@@ -42,17 +32,26 @@ class CustomerManager: # Customer manager class will handle the methods.
         #logger.info(f' get_id method ran successfully with return : {self.id}') -
         return self.id
 
-    def get_client(self, id): ##MISSING error if id doesn't exist in database.
-        User = Query()
-        customer = self.db.search(User.id == id)
-        if (len(customer) == 0):
+    def add_customer(self,name: str, email: str, age: int, country: str): # Retrieves customer from BaseModel for e-mail validation and inserts into the database
+        customer = Customer(name=name, email=email, age=age, country=country) # Creates object from Customer, using pydantic validates the entries like e-mail.
+        customer_dict = customer.dict() # transforms the customer into a dictionary for easier handling
+        customer_dict['id'] = self.id # Adds the column id to the output
+        logger.info(f' add_customer method ran successfully with return: {customer_dict}')
+        return db.insert(customer_dict) #Method inserts the customer into the database.
+
+    
+
+    def get_client(self, id): # Retrieves the customer from given ID
+        User = Query() 
+        customer = self.db.search(User.id == id) # Locates whole customer via the ID query.
+        if (len(customer) == 0): # if the query returns empty. Warning error appears.
             logger.warning(f"This is a warning message, entry has {len(customer)} values")
             sys.exit('Exiting program, id retrieval unsuccessful')
         customer_dict = dict(customer[0])
         logger.info(f' Customer method ran successfully with id {id} queried: {customer[0]}')
         return customer_dict
 
-    def dump(self):  # method for dumping a parquet file
+    def dump(self):  # Dumps a parquet file partitioned by country .
         logger.debug(f"dump is being initiated")
         pd_dataset = pd.DataFrame(db.all())  # convert db.all to a pandas dataset
         logger.debug(f"len pd dataset:{len(pd_dataset)}")
@@ -68,12 +67,11 @@ class CustomerManager: # Customer manager class will handle the methods.
                                    ('id', pa.int64())])  # Define the schema for the dump
             partition_scheme = ds.partitioning(pa.schema([pa.field('country', pa.string())]),
                                                flavor=None)  # Define partitioning object
-            parquet_file = pq.write_to_dataset(table=pa_dataset, root_path=os.getcwd(), partitioning=partition_scheme,
-                                               schema=my_schema, basename_template='dump{i}.parquet',
+            parquet_file = pq.write_to_dataset(table=pa_dataset, root_path='dump',basename_template='dump{i}.parquet', partitioning=partition_scheme,
+                                               schema=my_schema, 
                                                existing_data_behavior='overwrite_or_ignore')
             logger.info(f' database dumped successfully in {pd_dataset.country.unique()} folders')
             
-
 if __name__ == '__main__':
     entry = CustomerManager()
     fire.Fire(entry)

@@ -29,8 +29,8 @@ def test_get_customer():
 def test_dump():
     customer = CustomerManager()
     customer.dump()
-    parquet_dir= os.getcwd() + '/country_test'
-    parquet_file= os.getcwd() + '/country_test/dump0.parquet'
+    parquet_dir= os.getcwd() + '/dump'
+    parquet_file= os.getcwd() + '/dump/country_test/dump0.parquet'
     
     assert path.isdir(parquet_dir) and path.isfile(parquet_file)
     
