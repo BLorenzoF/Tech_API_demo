@@ -12,7 +12,7 @@ def pytest_sessionfinish(session, exitstatus):
     Called after whole test run finished, right before
     returning the exit status to the system.
     """
-    os.remove(os.getcwd() + '/db.json')
-    shutil.rmtree('dump')
+    os.remove(os.getcwd() + '/dbtest.json')
+    shutil.rmtree('test_dump')
 
 
