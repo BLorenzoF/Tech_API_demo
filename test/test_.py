@@ -33,10 +33,6 @@ def test_dump():
     parquet_file= os.getcwd() + '/dump/country_test/dump0.parquet'
     
     assert path.isdir(parquet_dir) and path.isfile(parquet_file)
-    
-#os.remove(os.getcwd() + '/db.json')
-#os.remove(os.getcwd() + '/country_test/dump0.parquet')
-#shutil.rmtree('country_test')
 
 if __name__ == '__main__':
     import pytest
