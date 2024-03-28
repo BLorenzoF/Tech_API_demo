@@ -35,7 +35,7 @@ To prevent dependency conflicts, installing a virtual environment via the `venv`
         }
     
     example:
-        python danelfin_demo/main.py add-customer --name Peter --email peter@test.com --age 32 --country ES
+        python danelfin_demo/main.py add_customer --name Peter --email peter@test.com --age 32 --country ES
 
     ```
 - Get customer
@@ -53,7 +53,7 @@ To prevent dependency conflicts, installing a virtual environment via the `venv`
         }
     
     example:
-        python danelfin_demo/main.py get-client --id 1
+        python danelfin_demo/main.py get_client --id 1
     ```
 
 - Dump clients

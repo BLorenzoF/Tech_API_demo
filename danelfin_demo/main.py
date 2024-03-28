@@ -12,18 +12,20 @@ import fire
 db = TinyDB('db.json') # declaring db variable.
 
 class Customer(BaseModel): # Creation of customer class for add_customer
+    logger.info(f'Pydantic customer basemodel created')
     name: str
     email: EmailStr
     age: int
     country: str
 
 class CustomerManager: # Customer manager class will handle the methods.
-
+    
     def __init__(self):
         self.id = self.get_id() # will update id for it's output.
         self.db = db # introducing variable for get_id method
         
     def get_id(self): #Retrieves the len of the database to get it's last ID. Used to add id in add_customer method
+        
         last_row = db.get(doc_id=len(db))
         if last_row:
             self.id = last_row.doc_id + 1
@@ -33,6 +35,21 @@ class CustomerManager: # Customer manager class will handle the methods.
         return self.id
 
     def add_customer(self,name: str, email: str, age: int, country: str): # Retrieves customer from BaseModel for e-mail validation and inserts into the database
+        '''Inserts given customer data into db.json database, given values checked by pydantic
+
+    	Parameters:
+        --name (str): Name of the customer
+        
+        --email (str): e-mail of the customer, required to have a "@" symbol and a domain extension (.com, .org ...)
+        
+        --age (int): age of the customer
+        
+        --country (str): Country of the customer. This parameter will be used for partitioning when using "dump" method 
+
+    	Returns:
+    	
+        id number of newly inserted object at the database   
+    	'''
         customer = Customer(name=name, email=email, age=age, country=country) # Creates object from Customer, using pydantic validates the entries like e-mail.
         customer_dict = customer.dict() # transforms the customer into a dictionary for easier handling
         customer_dict['id'] = self.id # Adds the column id to the output
@@ -42,6 +59,18 @@ class CustomerManager: # Customer manager class will handle the methods.
     
 
     def get_client(self, id): # Retrieves the customer from given ID
+        '''Retrieves customer data from given ID
+	
+    	Parameters:
+        --id (int): id of customer in the db.json file
+	
+    	Returns:
+    	name
+    	email
+    	age
+    	country
+    	id
+    	'''
         User = Query() 
         customer = self.db.search(User.id == id) # Locates whole customer via the ID query.
         if (len(customer) == 0): # if the query returns empty. Warning error appears.
@@ -52,7 +81,16 @@ class CustomerManager: # Customer manager class will handle the methods.
         return customer_dict
 
     def dump(self):  # Dumps a parquet file partitioned by country .
-        logger.debug(f"dump is being initiated")
+        '''dumps the db.json in files partitioned by country
+        
+    	Parameters:
+        none
+        
+    	Returns:
+    	parquet files at folder "dump/{country}/dump{i}.parquet"
+    	'''
+    	
+        #logger.info("dump is being initiated")
         pd_dataset = pd.DataFrame(db.all())  # convert db.all to a pandas dataset
         logger.debug(f"len pd dataset:{len(pd_dataset)}")
         if (len(pd_dataset) == 0):
@@ -71,7 +109,7 @@ class CustomerManager: # Customer manager class will handle the methods.
                                                schema=my_schema, 
                                                existing_data_behavior='overwrite_or_ignore')
             logger.info(f' database dumped successfully in {pd_dataset.country.unique()} folders')
-            
+
 if __name__ == '__main__':
     entry = CustomerManager()
     fire.Fire(entry)
