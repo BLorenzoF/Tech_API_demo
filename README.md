@@ -1,4 +1,4 @@
-# Danelfin_demo
+# Tech_API_demo
 
 ## Description
 Project for Managing and Adding Customers. This project has an easy-to-use storage system. It checks data carefully, records details, and tests everything well. Everything is neatly arranged and easy to understand. It also focuses on managing errors well. Plus, the project uses Docker to keep everything running smoothly in its own container
